@@ -37,7 +37,12 @@ const Navbar = () => {
       }`}
     >
       <Link to="/">
-        <motion.img whileHover={{scale:1.05}} src={assets.logo} alt="logo" className="h-8" />
+        <motion.img
+          whileHover={{ scale: 1.05 }}
+          src={assets.logo}
+          alt="logo"
+          className="h-8"
+        />
       </Link>
 
       <div
@@ -45,11 +50,28 @@ const Navbar = () => {
           location.pathname === "/" ? "bg-light" : "bg-white"
         } ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}
       >
-        {menuLinks.map((link, index) => (
+        {/* {menuLinks.map((link, index) => (
           <Link key={index} to={link.path}>
             {link.name}
           </Link>
-        ))}
+        ))} */}
+        {menuLinks.map((link, index) =>
+          link.external ? (
+            <a
+              key={index}
+              href={link.path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-link"
+            >
+              {link.name}
+            </a>
+          ) : (
+            <Link key={index} to={link.path} className="nav-link">
+              {link.name}
+            </Link>
+          ),
+        )}
 
         <div className="hidden lg:flex items-center text-sm gap-2 border border-borderColor px-3 rounded-full max-w-56">
           <input

@@ -14,9 +14,11 @@ export const AppProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [cars, setCars] = useState([]);
 
@@ -27,11 +29,14 @@ export const AppProvider = ({ children }) => {
       if (data.success) {
         setUser(data.user);
         setIsOwner(data.user.role === "owner");
+        setIsAdmin(data.user.role === "admin");
       } else {
         navigate("/");
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setAuthLoading(false); // ✅ IMPORTANT
     }
   };
 
@@ -80,6 +85,8 @@ export const AppProvider = ({ children }) => {
     setToken,
     isOwner,
     setIsOwner,
+    isAdmin,
+    setIsAdmin,
     fetchUser,
     showLogin,
     setShowLogin,
@@ -91,6 +98,8 @@ export const AppProvider = ({ children }) => {
     setPickupDate,
     returnDate,
     setReturnDate,
+    authLoading,
+    setAuthLoading
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

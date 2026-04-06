@@ -6,13 +6,15 @@ import toast from "react-hot-toast";
 import { motion } from "motion/react";
 
 const MyBookings = () => {
-  const { axios, user, currency } = useAppContext();
+  const { api, user, currency } = useAppContext();
 
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  //   Fetch bookings
   const fetchMyBookings = async () => {
     try {
-      const { data } = await axios.get("/api/booking/user");
+      const { data } = await api.get("/api/booking/user");
 
       if (data.success) {
         setBookings(data.bookings);
@@ -20,12 +22,19 @@ const MyBookings = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Failed to fetch bookings");
+    } finally {
+      setLoading(false);
     }
   };
 
+  //   Run when user is available
   useEffect(() => {
-    user && fetchMyBookings();
+    if (user) {
+      fetchMyBookings();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   return (
@@ -41,32 +50,41 @@ const MyBookings = () => {
         align="left"
       />
 
-      <div>
-        {bookings.map((booking, index) => (
+      {/*   Loading */}
+      {loading && <p className="text-gray-500 mt-10">Loading bookings...</p>}
+
+      {/*   No bookings */}
+      {!loading && bookings.length === 0 && (
+        <p className="text-gray-500 mt-10">No bookings found.</p>
+      )}
+
+      {/*   Bookings List */}
+      {!loading &&
+        bookings.map((booking, index) => (
           <motion.div
+            key={booking._id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay:0.1 * index }}
-            key={booking._id}
+            transition={{ duration: 0.4, delay: 0.1 * index }}
             className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 border border-borderColor rounded-lg mt-5 first:mt-12"
           >
             {/* Car Image + Info */}
             <div className="md:col-span-1">
               <div className="rounded-md overflow-hidden mb-3">
                 <img
-                  src={booking.car.image}
-                  alt=""
+                  src={booking.car?.image}
+                  alt="car"
                   className="w-full h-auto aspect-video object-cover"
                 />
               </div>
 
               <p className="text-lg font-medium mt-2">
-                {booking.car.brand} {booking.car.model}
+                {booking.car?.brand} {booking.car?.model}
               </p>
 
               <p className="text-gray-500">
-                {booking.car.year} • {booking.car.category} •{" "}
-                {booking.car.location}
+                {booking.car?.year} • {booking.car?.category} •{" "}
+                {booking.car?.location}
               </p>
             </div>
 
@@ -97,8 +115,8 @@ const MyBookings = () => {
                 <div>
                   <p className="text-gray-500">Rental Period</p>
                   <p>
-                    {booking.pickupDate.split("T")[0]} To{" "}
-                    {booking.returnDate.split("T")[0]}
+                    {booking.pickupDate?.split("T")[0]} To{" "}
+                    {booking.returnDate?.split("T")[0]}
                   </p>
                 </div>
               </div>
@@ -111,7 +129,7 @@ const MyBookings = () => {
                 />
                 <div>
                   <p className="text-gray-500">Pick-up Location</p>
-                  <p>{booking.car.location}</p>
+                  <p>{booking.car?.location}</p>
                 </div>
               </div>
             </div>
@@ -124,12 +142,11 @@ const MyBookings = () => {
                   {currency}
                   {booking.price}
                 </h1>
-                <p>Booked on {booking.createdAt.split("T")[0]}</p>
+                <p>Booked on {booking.createdAt?.split("T")[0]}</p>
               </div>
             </div>
           </motion.div>
         ))}
-      </div>
     </motion.div>
   );
 };

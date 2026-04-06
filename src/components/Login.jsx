@@ -3,31 +3,51 @@ import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
 const Login = () => {
-  const { setShowLogin, axios, setToken, navigate } = useAppContext();
+  const { setShowLogin, api, setToken, navigate } = useAppContext();
+
   const [state, setState] = useState("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmitHandler = async (event) => {
+    event.preventDefault();
+
+    if (loading) return;
+
     try {
-      event.preventDefault();
-      const { data } = await axios.post(`/api/user/${state}`, {
+      setLoading(true);
+
+      const { data } = await api.post(`/api/user/${state}`, {
         name,
         email,
         password,
       });
 
       if (data.success) {
-        navigate("/");
-        setToken(data.token);
         localStorage.setItem("token", data.token);
+        setToken(data.token);
+
+        toast.success(
+          state === "login" ? "Login successful" : "Account created",
+        );
+
+        navigate("/");
         setShowLogin(false);
+
+        // Reset form
+        setName("");
+        setEmail("");
+        setPassword("");
+        setState("login");
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-        toast.error(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -106,12 +126,20 @@ const Login = () => {
           </p>
         )}
 
-        <button className="bg-primary hover:bg-blue-800 transition-all text-white w-full py-2 rounded-md cursor-pointer">
-          {state === "register" ? "Create Account" : "Login"}
+        <button
+          disabled={loading}
+          className="bg-primary hover:bg-blue-800 transition-all text-white w-full py-2 rounded-md cursor-pointer disabled:opacity-50"
+        >
+          {loading
+            ? state === "login"
+              ? "Logging in..."
+              : "Creating..."
+            : state === "register"
+              ? "Create Account"
+              : "Login"}
         </button>
       </form>
     </div>
   );
 };
-
 export default Login;

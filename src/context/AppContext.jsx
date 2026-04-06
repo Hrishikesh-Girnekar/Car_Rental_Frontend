@@ -1,9 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+import api from "../api/api.js";
 
 export const AppContext = createContext();
 
@@ -11,7 +9,7 @@ export const AppProvider = ({ children }) => {
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY;
 
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -19,66 +17,69 @@ export const AppProvider = ({ children }) => {
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [authLoading, setAuthLoading] = useState(true);
-
   const [cars, setCars] = useState([]);
 
-  // Function to check if user is logged in
+  // Fetch User
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get("/api/user/data");
+      const { data } = await api.get("/api/user/data");
+
       if (data.success) {
         setUser(data.user);
         setIsOwner(data.user.role === "owner");
         setIsAdmin(data.user.role === "admin");
       } else {
-        navigate("/");
+        logout();
       }
     } catch (error) {
-      toast.error(error.message);
+      console.log(error);
+      logout(); // important
     } finally {
-      setAuthLoading(false); // ✅ IMPORTANT
+      setAuthLoading(false);
     }
   };
 
-  // Function to fetch all cars from the server
+  // Fetch Cars
   const fetchCars = async () => {
     try {
-      const { data } = await axios.get("/api/user/cars");
-      data.success ? setCars(data.cars) : toast.error(data.message);
+      const { data } = await api.get("/api/user/cars");
+      if (data.success) setCars(data.cars);
+      else toast.error(data.message);
     } catch (error) {
-      toast.error(error.message);
+      console.log(error);
     }
   };
 
-  // Function to log out the user
+  // Logout
   const logout = () => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
     setIsOwner(false);
-    axios.defaults.headers.common["Authorization"] = "";
-    toast.success("You have been logged out");
+    setIsAdmin(false);
+    toast.success("Logged out");
+    navigate("/");
   };
 
-  // useEffect to retrieve the token from localStorage
+  // Load initial data
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setToken(token);
     fetchCars();
   }, []);
 
-  // useEffect to fetch user data when token is available
+  // When token changes
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `${token}`;
+      localStorage.setItem("token", token);
       fetchUser();
+    } else {
+      setAuthLoading(false);
     }
   }, [token]);
 
   const value = {
     navigate,
     currency,
-    axios,
+    api,
     user,
     setUser,
     token,
@@ -86,25 +87,20 @@ export const AppProvider = ({ children }) => {
     isOwner,
     setIsOwner,
     isAdmin,
-    setIsAdmin,
     fetchUser,
     showLogin,
     setShowLogin,
     logout,
     fetchCars,
     cars,
-    setCars,
     pickupDate,
     setPickupDate,
     returnDate,
     setReturnDate,
     authLoading,
-    setAuthLoading
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-export const useAppContext = () => {
-  return useContext(AppContext);
-};
+export const useAppContext = () => useContext(AppContext);

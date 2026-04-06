@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sentry/react": "^10.47.0",
+    "@sentry/tracing": "^7.120.4",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
     "motion": "^12.26.2",

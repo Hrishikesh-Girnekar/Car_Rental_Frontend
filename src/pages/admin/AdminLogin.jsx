@@ -3,55 +3,51 @@ import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
 
 const AdminLogin = () => {
-  const { axios, setToken, fetchUser, navigate } = useAppContext();
+  const { api, setToken, navigate } = useAppContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ===============================
-  // Admin Login Handler
-  // ===============================
+  // Login Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+
     setLoading(true);
-    // ✅ clear old session
-    localStorage.removeItem("token");
-    axios.defaults.headers.common["Authorization"] = "";
 
     try {
-      // ✅ SAME LOGIN API
-      const { data } = await axios.post("/api/user/login", {
+      // Login API
+      const { data } = await api.post("/api/user/login", {
         email,
         password,
       });
 
       if (!data.success) {
         toast.error(data.message);
-        setLoading(false);
         return;
       }
 
-      // ✅ Save token
+      // Save token (interceptor will handle headers)
       localStorage.setItem("token", data.token);
       setToken(data.token);
 
-      axios.defaults.headers.common["Authorization"] = data.token;
+      // Fetch user role
+      const userRes = await api.get("/api/user/data");
 
-      // ✅ Fetch user data to get role
-      const userRes = await axios.get("/api/user/data");
+      if (userRes.data.user?.role !== "admin") {
+        toast.error("Access denied: Admin only");
 
-      if (userRes.data.user.role !== "admin") {
-        toast.error("You are not authorized as Admin");
-
-        // ❌ logout immediately
+        // Logout immediately
         localStorage.removeItem("token");
         setToken(null);
-        setLoading(false);
+
         return;
       }
 
       toast.success("Admin login successful");
+
       navigate("/admin/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
@@ -72,7 +68,7 @@ const AdminLogin = () => {
         <input
           type="email"
           placeholder="Admin Email"
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-2 mb-4 border rounded outline-none"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -82,16 +78,17 @@ const AdminLogin = () => {
         <input
           type="password"
           placeholder="Password"
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-2 mb-4 border rounded outline-none"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
 
+        {/* Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90"
+          className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90 disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Login"}
         </button>

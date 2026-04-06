@@ -15,7 +15,7 @@ import Login from "./components/Login";
 import { Toaster } from "react-hot-toast";
 import { useAppContext } from "./context/AppContext";
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/adminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const App = () => {
   const { showLogin } = useAppContext();

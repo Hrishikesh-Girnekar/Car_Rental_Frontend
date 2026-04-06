@@ -14,7 +14,7 @@ import ManageBookings from "./pages/owner/ManageBookings";
 import Login from "./components/Login";
 import { Toaster } from "react-hot-toast";
 import { useAppContext } from "./context/AppContext";
-import AdminLogin from "./pages/admin/adminLogin";
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/adminDashboard";
 
 const App = () => {

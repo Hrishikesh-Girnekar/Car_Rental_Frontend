@@ -132,37 +132,31 @@ const Cars = () => {
         transition={{ duration: 0.5 }}
         className="px-6 md:px-16 lg:px-24 xl:px-32 mt-10"
       >
-        {/*   Loading */}
-        {loading && (
-          <p className="text-gray-500 text-center mt-10">Loading cars...</p>
-        )}
-
-        {/*   Empty State */}
-        {!loading && filteredCars.length === 0 && (
+        {/* Loader */}
+        {loading ? (
+          <Loader />
+        ) : filteredCars.length === 0 ? (
           <p className="text-gray-500 text-center mt-10">No cars found.</p>
-        )}
+        ) : (
+          <>
+            <p className="text-gray-500 xl:px-20 max-w-7xl mx-auto">
+              Showing {filteredCars.length} Cars
+            </p>
 
-        {/*   Count */}
-        {!loading && filteredCars.length > 0 && (
-          <p className="text-gray-500 xl:px-20 max-w-7xl mx-auto">
-            Showing {filteredCars.length} Cars
-          </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto">
+              {filteredCars.map((car) => (
+                <motion.div
+                  key={car._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <CarCard car={car} />
+                </motion.div>
+              ))}
+            </div>
+          </>
         )}
-
-        {/*   Cars Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 xl:px-20 max-w-7xl mx-auto">
-          {!loading &&
-            filteredCars.map((car) => (
-              <motion.div
-                key={car._id} //   FIXED (no index)
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <CarCard car={car} />
-              </motion.div>
-            ))}
-        </div>
       </motion.div>
     </div>
   );

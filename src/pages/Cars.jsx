@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 import { motion } from "motion/react";
+import Loader from "../components/Loader";
 
 const Cars = () => {
   const [searchParams] = useSearchParams();

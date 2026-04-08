@@ -1,14 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Title from "./Title";
 import CarCard from "./CarCard";
 import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { motion } from "motion/react";
+import Loader from "./Loader";
 
 const FeaturedSection = () => {
   const navigate = useNavigate();
   const { cars } = useAppContext();
+
+  const [loading, setLoading] = useState(true);
+
+  // ✅ Handle loading properly
+  useEffect(() => {
+    if (cars && cars.length > 0) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [cars]);
 
   return (
     <motion.div
@@ -29,13 +41,12 @@ const FeaturedSection = () => {
         />
       </motion.div>
 
-      {/* Empty state */}
-      {(!cars || cars.length === 0) && (
+      {/* ✅ Loader */}
+      {loading ? (
+        <Loader text="Fetching cars..."  />
+      ) : cars.length === 0 ? (
         <p className="text-gray-500 mt-10">No cars available.</p>
-      )}
-
-      {/* Cars Grid */}
-      {cars && cars.length > 0 && (
+      ) : (
         <motion.div
           initial={{ opacity: 0, y: 80 }}
           whileInView={{ opacity: 1, y: 0 }}

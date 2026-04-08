@@ -78,12 +78,15 @@ const Cars = () => {
 
   //   Handle search params change
   useEffect(() => {
-    if (isSearchData) {
-      searchCarAvailability();
+  if (!isSearchData) {
+    if (cars && cars.length > 0) {
+      setFilteredCars(cars);
+      setLoading(false); // ✅ stop loader only when cars arrive
     } else {
-      setLoading(false);
+      setLoading(true); // ✅ keep loader until cars come
     }
-  }, [pickupLocation, pickupDate, returnDate]);
+  }
+}, [cars]);
 
   //   Handle local filtering
   useEffect(() => {
@@ -135,7 +138,7 @@ const Cars = () => {
       >
         {/* Loader */}
         {loading ? (
-          <Loader />
+          <Loader text="Fetching cars..." />
         ) : filteredCars.length === 0 ? (
           <p className="text-gray-500 text-center mt-10">No cars found.</p>
         ) : (
